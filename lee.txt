@@ -1,0 +1,23 @@
+#- Recuerda las instrucciones:
+
+1) No cambies el nombre de los ficheros
+
+2) Los ficheros en los que tenéis que trabajar son los ficheros .Rmd. Hay 2 ficheros .Rmd: 
+
+  a) Readme.Rmd: al knitearlo modificará el fichero Readme.md
+  b) index.Rmd: aquí es donde has de escribir tú trabajo. Al knittearlo generará el fichero index.html
+  
+3) En el fichero Readme.Rmd has de leer atentamente las instrucciones. Hay un párrafo inicial que NO has de modificar. En el segundo párrafo solo has de sustituir "perezp44" por tu usuario de Github, y en el tercer párrafo se trata de que hagas un resumen de tu trabajo.
+
+4) En el fichero index.Rmd has de escribir tu trabajo. Además recuerda que has de poner en el YAML el título y los firmantes del trabajo.
+
+4) Cuando hayas modificado completamente los 2 ficheros .Rmd, no te olvides de knittearlos para que los cambios se recojan en los ficheros de salida
+
+5) Una vez hayas knitetado los 2 ficheros .Rmd; es decir, una vez tengas la versión final de los ficheros index.html y index.md, tendras que subir todos los archivos del Rproject a Github
+
+6) Tienes que subir (repito, todos los archivos del Rproject) a un repo de Github que se ha de llamar necesariamente "trabajo_BigData_slides". Es en este repo donde has de subir TODOS los archivos del Rproject en el que has hecho tu trabajo
+
+7) Una vez este TODO en el tu repo de Github has de activar la página web. para ellos has de ir a los settings del repo (el icono de la rueda dentada) y bajar hasta que veas "Github Pages" (está hacia el final). Una vez dentro de "Github Pages" verás un desplegable que pone "None", has de cambiarlo a "main". Una vez cambiado a "main" has de pinchar en el botón "Save.
+
+Ya lo tienes. En unos minutos trabajo se podrá visualizar en la dirección: 
+https://perezp44.github.io/trabajo_BigData_slides/   Logicamente has de sustituir "perezp44" por tu nombre usuario de Github.
