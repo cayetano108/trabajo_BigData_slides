@@ -11,12 +11,12 @@ página web de la asignatura puede verse aquí:
 <!-- En la linea de abajo TIENES QUE SUSTITUIR "perezp44" por tu usuario de Github-->
 
 La versión final de estas transparencias puede visualizarse en:
-<https://perezp44.github.io/_trabajo_BigData_slides/>.
+<https://cayetano108.github.io/_trabajo_BigData_slides/>.
 
 <!-- En la linea de abajo TIENES QUE SUSTITUIR (otra vez) "perezp44" por tu usuario de Github-->
 
 La versión final del trabajo puede visualizarse en:
-<https://perezp44.github.io/_trabajo_BigData_equipo/>.
+<https://cayetano108.github.io/_trabajo_BigData_equipo/>.
 
 <!-- Abajo podéis escribir lo que queráis, igual un resumen del trabajo, o ..., o ... pero al menos, tenéis que poner el título del trabajo y el nombre de los componentes del equipo-->
 
