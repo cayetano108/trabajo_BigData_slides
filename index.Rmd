@@ -1,0 +1,1015 @@
+---
+title: "Alt + Formula 1"
+subtitle: "Cayetano Romero Monteagudo   \n\n Alejandro García Segarra   \n \n Carlos García Castilla "
+author: "Universitat de València"
+date: "Diciembre de 2021 (actualizado el `r format(Sys.time(), '%d-%m-%Y')`)"
+output: slidy_presentation
+    #css: "./assets/my_css_file.css"
+
+---
+## Índice
+
+<span style="color:cyan">
+
+### - Un paseo por la historia
+
+### - Lo más destacado
+
+### - Temporada 2021
+
+### - El nano 
+
+</span>
+
+
+<div class='right' style='float:right;width:48%'>
+
+![](./imagenes/logos/portada.png){width=340 height=400}
+
+</div>
+
+```{css, echo=FALSE} 
+@font-face {
+  font-family: F1;
+  src: url(https://www.formula1.com/etc/designs/fom-website/fonts/F1Regular/Formula1-Regular.ttf);
+}
+
+span{
+  font-family: F1;
+}
+
+a{
+  font-family: F1;
+}
+
+.nav-pills>li.active>a:focus {
+    color: #ffffff;
+    background-color: lightgray;
+}
+
+.container-fluid, .container-fluid h1 {
+    font-family: F1;
+    line-height: 1.7;
+}
+
+.container-fluid p {
+    font-family: F1;
+    color:cyan;
+}
+
+h1,h2,h3,h4,h5,h6,p, table {
+  font-family: F1;
+  color: cyan
+}
+
+body {background-color: #212121;}
+    
+.subtitle{
+    font-family: F1;
+    line-height: 1;
+}
+    
+    
+```
+
+```{r chunk-setup, include = FALSE}
+knitr::opts_chunk$set(echo = TRUE, eval = TRUE, message = FALSE, warning = FALSE, 
+                      #results = "hold",
+                      cache = FALSE, cache.path = "/caches/", comment = "#>",
+                      #fig.width = 7, #fig.height= 7,   
+                      #out.width = 7, out.height = 7,
+                      collapse = TRUE,  fig.show = "hold",
+                      fig.asp = 0.628, out.width = "75%", fig.align = "center")
+knitr::opts_chunk$set(dev = "png", dev.args = list(type = "cairo-png"))
+```
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+
+```{r options-setup, include = FALSE}
+options(scipen = 999) #- para quitar la notación científica
+options("yaml.eval.expr" = TRUE) 
+```
+
+
+```{r packages-setup, include = FALSE, warning=FALSE}
+library(meme)
+library(tidyverse)
+library(klippy)  #- remotes::install_github("rlesur/klippy")
+library(knitr)
+library(rio)
+library(ggplot2)
+library(gganimate)
+library(ggThemeAssist)
+library(globe4r)  #remotes::install_github("JohnCoene/globe4r")
+library(remotes) 
+library(gt)
+library(plotly)
+library(readxl)
+library(treemap) #install.packages(treemap)
+library(d3treeR) #remotes::install_github("d3treeR/d3treeR")
+library(magick)
+library(stringr)
+library(tmap)
+library(flextable)
+library(officer)
+library(png)
+library(grid)
+library(tweetrmd)
+```
+
+```{r, echo=FALSE, include=FALSE, warning=FALSE}
+#---PREPARACION DE LOS DATOS
+tiempos <- rio::import(file = "./datos/lap_times.csv")
+pilotos <- rio::import(file = "./datos/drivers.csv")
+resultados <- rio::import(file = "./datos/results.csv")
+carreras <- rio::import(file = "./datos/races.csv")
+escuderias <- rio::import(file = "./datos/constructors.csv")
+escuderias2 <- rio::import(file = "./datos/constructor_standings.csv")
+result_escuderias <- rio::import(file = "./datos/constructor_results.csv")
+circuitos <- rio::import(file = "./datos/circuits.csv")
+
+#----------------------------------------
+#capitulo oscuro del deporte
+#creo df de muertes de formula 1
+muertesf1 <- data.frame(
+  "orden" = 1:42,
+  "driverRef" = c("Chet Miller", "Carl Scaraborough", "Onofre Marimon", "Manny Ayulo", "Bill Vukovich", "Alberto Ascari","Eugenio Castellotti", "Keith Andrews", "Pat O'Connor", "Luigi Musso", "Peter Collins", "Stuart Lewis-Evans", "Jerry Unser", "Bob Cortner", "Ivor Bueb", "Chris Bristow", "Alan Stacey", "Giulio Cabianca", "Wolfgang von Trips", "Carel Godin de Beaufort", "John Taylor", "Lorenzo Bandini", "Bob Anderson", "Jo Schlesser", "Gerhard Mitter", "Piers Courage", "Jochen Rindt", "Jo Siffert", "Roger Williamson", "François Cevert", "Peter Revson", "Helmuth Koinigg", "Mark Donohue", "Tom Pryce", "Ronnie Peterson", "Patrick Depailler", "Gilles Villeneuve", "Riccardo Paletti", "Elio de Angelis", "Roland Ratzenberger", "Ayrton Senna", "Jules Bianchi"),
+  "nationality" = c("American", "American", "Argentine", "American", "American", "Italian","Italian", "American", "American", "Italian", "British", "British", "American", "American", "British", "British", "British", "Italian", "German", "Dutch", "British", "Italian" , "British", "French", "German", "British", "Austrian", "Swiss", "British", "French", "American", "Austrian", "American", "British", "Swedish", "French", "Canadian", "Italian", "Italian", "Austrian", "Brazilian", "French"),
+  "fecha_muerte" = c(1953, 1953, 1954, 1955, 1955, 1955, 1957, 1957, 1958,1958,1958,1958,1959,1959,1959,1960, 1960,1961,1961,1964,1966, 1967, 1967,1968,1969, 1970,1970,1971,1973,1973,1974,1974,1975,1977,1978,1980,1982,1982,1986,1994,1994,2014))
+#no pongo las comillas en los años para que se creen directamente como observaciones numericas
+
+#creo un df con todos los años para luego fusionarlo, ya que no hay muertes todos los años 
+anyos <- data.frame(
+  "orden" = 1:71,
+  "año" = c(1950:2020))
+
+#sumatorio de las muertes por año
+muertes_anyo <- muertesf1 %>% group_by(fecha_muerte) %>% mutate(muertesxanyo = sum(n())) %>% distinct(fecha_muerte, muertesxanyo) 
+
+#fusiono los 2 dfs para que tenga en cuenta los años donde no hay muertes
+muertesf1_final <- full_join(muertes_anyo, anyos, c("fecha_muerte" = "año")) %>% select(fecha_muerte,muertesxanyo) %>% arrange(fecha_muerte)
+
+#convierto los N/A en 0, es decir, cuando no hay observaciones, ha habido 0 muertes
+muertesf1_final[is.na(muertesf1_final)] <- 0
+
+#------------------------------------------------
+#str(resultados)
+#str(pilotos)
+#pilotos[, c(1)] <- sapply(pilotos[, c(1)], as.numeric)
+#resultados[, c(3,6,9)] <- sapply(resultados[, c(3,6,9)], as.numeric)
+
+#----------------------------------------------------------------------------------
+
+#numero de carreras que ha corrido cada piloto
+
+n_carreras <- resultados %>% group_by(driverId) %>% mutate(numero_carreras = sum(n())) %>% distinct(numero_carreras) %>% arrange(desc(numero_carreras)) 
+
+n_carreras_nom <- full_join(n_carreras, pilotos, c ("driverId" = "driverId")) %>% select(driverId, driverRef, numero_carreras)  %>%  filter(numero_carreras >= 202 ) #los 20 qque mas carreras tienen (no funciona usar slice_max)
+
+#--------------------------------------------------------------------------------
+#nacionalidad de los pilotos a lo largo de la historia 
+#mapa
+nacionalidad <- pilotos %>% group_by(nationality) %>% mutate(numero_compatriotas = sum(n())) %>% distinct(numero_compatriotas) %>% arrange(desc(numero_compatriotas)) %>% 
+  str_replace_all(., "British", "United Kingdom") %>% 
+  str_replace_all(., "American", "United States") %>% 
+  str_replace_all(., "Italian", 'Italy') %>% 
+  str_replace_all(., "French" , 'France') %>% 
+  str_replace_all(., "German" , 'Germany') %>% 
+  str_replace_all(., "Brazilian" , 'Brazil') %>% 
+  str_replace_all(., "Argentine" , 'Argentina') %>% 
+  str_replace_all(., "Swiss" , 'Switzerland') %>% 
+  str_replace_all(., "Belgian" , 'Belgium') %>% 
+  str_replace_all(., "South African" , 'South Africa') %>% 
+  str_replace_all(., "Japanese" , 'Japan') %>% 
+  str_replace_all(., "Australian" , 'Australia') %>%
+  str_replace_all(., "Dutch" , 'Netherlands') %>%
+  str_replace_all(., "Spanish" , 'Spain') %>%
+  str_replace_all(., "Austrian" , 'Austria') %>%
+  str_replace_all(., "Canadian" , 'Canada') %>%
+  str_replace_all(., "Swedish" , 'Sweden') %>%
+  str_replace_all(., "Finnish" , 'Finland') %>%
+  str_replace_all(., "New Zealander" , 'New Zealand') %>%
+  str_replace_all(., "Mexican" , 'Mexico') %>%
+  str_replace_all(., "Irish" , 'Ireland') %>%
+  str_replace_all(., "Danish" , 'Denmark') %>%
+  str_replace_all(., "Portuguese" , 'Portugal') %>%
+  str_replace_all(., "Monegasque" , 'France') %>%
+  str_replace_all(., "Rhodesian" , 'Zimbabwe') %>%
+  str_replace_all(., "Uruguayan" , 'Uruguay') %>%
+  str_replace_all(., "Russian" , 'Russia') %>%
+  str_replace_all(., "Colombian" , 'Colombia') %>%
+  str_replace_all(., "Venezuelan" , 'Venezuela') %>%
+  str_replace_all(., "East German" , 'German') %>%
+  str_replace_all(., "Indian" , 'India') %>%
+  str_replace_all(., "Thai" , 'Thailand') %>%
+  str_replace_all(., "Polish" , 'Poland') %>%
+  str_replace_all(., "Monegasque" , 'France') %>%
+  str_replace_all(., "Hungarian" , 'Hungary') %>%
+  str_replace_all(., "Czech" , 'Czech Rep.') %>%
+  str_replace_all(., "Malaysian" , 'Malaysia') %>%
+  str_replace_all(., "Chilean" , 'Chile') %>%
+  str_replace_all(., "Liechtensteiner" , 'Switzerland') %>%
+  str_replace_all(., "American-Italian" , 'United States') %>%
+  str_replace_all(., "Argentine-Italian" , 'Argentina') %>%
+  str_replace_all(., "Indonesian" , 'Indonesia')
+
+paises_normales <- c("United Kingdom", "United States", "Italy", "France", "Germany", "Brazil", "Argentina", "Switzerland", "Belgium", "South Africa", "Japan", "Australia", "Netherlands", "Spain", "Austria", "Canada", "Sweden", "Finland", "New Zealand", "Mexico", "Ireland", "Denmark", "Portugal", "France", "Zimbabwe", "Uruguay", "Russia", "Colombia", "Venezuela", "Germany", "India", "Thailand", "Poland", "Hungary", "Czech Rep.", "Malaysia", "Chile", "Switzerland", "United States", "Argentina", "Indonesia" )
+
+nacionalidad <- pilotos %>% group_by(nationality) %>% mutate(numero_compatriotas = sum(n())) %>% distinct(numero_compatriotas) %>% arrange(desc(numero_compatriotas)) %>% add_column(paises_normales) %>%  group_by(paises_normales) %>% mutate(total_pilotos = sum(numero_compatriotas)) %>%  distinct(paises_normales, total_pilotos)
+
+data(World)
+world <- World; rm(World)
+
+world <- world[!(world$name %in% c('Greenland', 'Antarctica')),]
+
+pilotos_por_paises <- full_join(nacionalidad, world, c( "paises_normales" = "name")) 
+
+pilotos_por_paises$country <- NULL
+
+pilotos_por_paises[is.na(pilotos_por_paises)] <- 0
+
+gg_pilotos_por_paises <- ggplot(data = pilotos_por_paises, aes(geometry = geometry)) + geom_sf() +
+       labs(title = "Pilotos por país",
+            caption = "Menor intensidad de color en aquellos paises con más pilotos")
+
+gg_pilotos_por_paises <- gg_pilotos_por_paises + geom_sf(aes(fill = total_pilotos)) + theme(plot.subtitle = element_text(colour = "white"),
+    plot.caption = element_text(colour = "white"),
+    axis.ticks = element_line(linetype = "blank"),
+    panel.grid.major = element_line(linetype = "blank"),
+    panel.grid.minor = element_line(linetype = "blank"),
+    axis.text = element_text(colour = "gray13"),
+    plot.title = element_text(size = 20,
+        colour = "white", hjust = 0.5), legend.text = element_text(colour = "white"),
+    legend.title = element_text(colour = "white"),
+    panel.background = element_rect(fill = "gray13"),
+    plot.background = element_rect(fill = "gray13"),
+    legend.background = element_rect(fill = "gray13")) +labs(fill = "Nª de pilotos") + theme(panel.background = element_rect(colour = "gray13"),
+    plot.background = element_rect(colour = "gray13")) + theme(panel.grid.major = element_line(colour = NA),
+    panel.background = element_rect(linetype = "solid"),
+    plot.background = element_rect(linetype = "solid")) + scale_fill_gradient2(low = "white", mid = "pink", high = "red", midpoint = .02)
+
+#------------------------------------------------------------------------------
+# numero de victorias por piloto
+victorias <- resultados %>% filter(position == "1") %>% group_by(driverId) %>% mutate(n_victorias = sum(n())) %>% distinct(n_victorias) %>% arrange(desc(n_victorias))#mutate(n_victorias_final = n_victorias*-1)
+
+#aqui fusiono con el df de pilotos para que aparezca el nombre y no sólo el ID del piloto en cuestion, y hago lo mismo que en el apartado de arriba para ordenar
+victorias_con_nombre <- full_join(victorias, pilotos, c ("driverId" = "driverId")) %>% select(driverId, nationality, driverRef, n_victorias)  #los 10 con mas victorias, tmp funciona slice_max
+mas_victorias <- victorias_con_nombre %>%  filter(n_victorias >= 25 ) 
+
+#victorias 2
+victorias2 <- full_join(pilotos, resultados, c("driverId" = "driverId")) %>% full_join(., carreras, c("raceId" = "raceId")) %>% select(driverId, driverRef, position, year, date) %>% filter(position == 1) %>% group_by(driverRef) %>% mutate(victoria_num = sum( NN = n())) %>% filter(victoria_num >= 20) %>% arrange(victoria_num, date) %>% mutate( suma_vic = cumsum(position))
+
+#-------------------------------------------------
+
+#resultado medio
+
+resultados[, c(7)] <- sapply(resultados[, c(7)], as.numeric)
+resultados[is.na(resultados)] <- 25 
+
+resultado_medio <-  full_join(pilotos, resultados,  c ("driverId" = "driverId")) %>% select(driverId, driverRef, position) %>% group_by(driverId) %>% mutate(result_medio = mean(position)) %>% distinct (driverId, driverRef, result_medio) %>% arrange(result_medio)
+
+#resultado medio en clasificacion
+resultado_medio_clas <-  full_join(pilotos, resultados,  c ("driverId" = "driverId")) %>% select(driverId, driverRef, grid) %>% group_by(driverId) %>% mutate(result_medio_clas = mean(grid)) %>% distinct (driverId, driverRef, result_medio_clas)  %>% filter(result_medio_clas > 0) %>% arrange(result_medio_clas)  
+
+
+#numero de vueltas liderando
+
+
+#puntos por carrera (puntos/carrera)
+
+puntos_x_carrera <-  full_join(pilotos, resultados,  c ("driverId" = "driverId")) %>% select(driverId, driverRef, points) %>% full_join(., n_carreras,  c ("driverId" = "driverId")) %>% group_by(driverId) %>% mutate(total_puntos = sum(points)) %>% distinct(driverId, driverRef, numero_carreras, total_puntos) %>% mutate(media_puntos = total_puntos/numero_carreras) %>% arrange(desc(media_puntos))
+
+#-------------------------------
+#remontadas
+
+#mas posiciones remontadas en una carrera gran premio
+
+
+resultados[, c(6,9)] <- sapply(resultados[, c(6,9)], as.numeric) #transformo variables grid y positionOrder en numerico
+str(resultados) # para comprobarlo
+#> 'data.frame':    25140 obs. of  18 variables:
+#>  $ resultId       : int  1 2 3 4 5 6 7 8 9 10 ...
+#>  $ raceId         : int  18 18 18 18 18 18 18 18 18 18 ...
+#>  $ driverId       : int  1 2 3 4 5 6 7 8 9 10 ...
+#>  $ constructorId  : int  1 2 3 4 1 3 5 6 2 7 ...
+#>  $ number         : chr  "22" "3" "7" "5" ...
+#>  $ grid           : num  1 5 7 11 3 13 17 15 2 18 ...
+#>  $ position       : num  1 2 3 4 5 6 7 8 25 25 ...
+#>  $ positionText   : chr  "1" "2" "3" "4" ...
+#>  $ positionOrder  : num  1 2 3 4 5 6 7 8 9 10 ...
+#>  $ points         : num  10 8 6 5 4 3 2 1 0 0 ...
+#>  $ laps           : int  58 58 58 58 58 57 55 53 47 43 ...
+#>  $ time           : chr  "1:34:50.616" "+5.478" "+8.163" "+17.181" ...
+#>  $ milliseconds   : chr  "5690616" "5696094" "5698779" "5707797" ...
+#>  $ fastestLap     : chr  "39" "41" "41" "58" ...
+#>  $ rank           : chr  "2" "3" "5" "7" ...
+#>  $ fastestLapTime : chr  "1:27.452" "1:27.739" "1:28.090" "1:28.603" ...
+#>  $ fastestLapSpeed: chr  "218.300" "217.586" "216.719" "215.464" ...
+#>  $ statusId       : int  1 1 1 1 1 11 5 5 4 3 ...
+#mayores remontadas de la historia, se resta posicion de salida - posicion final
+puestos_remontados <- resultados %>% mutate(remontados = grid - positionOrder) %>% select(raceId, driverId, grid, positionOrder, remontados) 
+
+
+#de toda la historia
+circuitos_gp <- full_join(carreras, circuitos, c("circuitId" = "circuitId")) %>% select(circuitId, name.y, raceId, year)
+
+ptos_remont_carrera <- inner_join(puestos_remontados, circuitos_gp)
+
+puestos_remont_piloto <- full_join(pilotos, ptos_remont_carrera, c("driverId" = "driverId")) %>% slice_max(remontados, n=10) %>% select(driverId, driverRef,name.y,year, raceId, grid, positionOrder, remontados)
+
+# de la hisotoria reciente
+circuitos_gp_recient <- full_join(carreras, circuitos, c("circuitId" = "circuitId")) %>% select(circuitId, name.y, raceId, year) %>% filter(year >= 1995)
+
+ptos_remont_carrera_recient <- inner_join(puestos_remontados, circuitos_gp_recient)
+
+puestos_remont_piloto_recient <- full_join(pilotos, ptos_remont_carrera_recient, c("driverId" = "driverId")) %>% slice_max(remontados, n=10) %>% select(driverId, driverRef, name.y, year,raceId, grid, positionOrder, remontados) %>% slice(1:4,6:8,10) %>% arrange(desc(remontados))
+
+
+#--------------------------------
+#mundiales por naionalidad y piloto
+campeones <- full_join(pilotos, resultados, c("driverId" = "driverId")) %>% full_join(., carreras, c("raceId" = "raceId")) %>% select(driverId, driverRef, nationality, constructorId, points, year, round) %>% full_join(., escuderias, c("constructorId" = "constructorId")) %>% select(driverId, driverRef, nationality.x, constructorId, points, year, name, round) %>%  group_by(year, driverRef) %>%  mutate(puntos_totales = cumsum(points)) %>% ungroup() %>% group_by(year) %>% slice_max(puntos_totales, n=1) %>% ungroup() %>% group_by(driverRef)%>% mutate(total_campeonatos = sum(NN = n())) %>% distinct(driverRef, nationality.x, total_campeonatos) %>% arrange(nationality.x, total_campeonatos)
+
+#----------------------------------
+#temporada 2021 tabla
+
+pilotos_2021 <- full_join(carreras, resultados, c("raceId" = "raceId") ) %>% 
+  full_join(.,pilotos, c("driverId"="driverId")) %>% 
+  filter(year=="2021") %>% 
+  select(forename,surname, year) %>% distinct(forename,surname) %>% na.omit() %>% arrange(surname) %>% str_replace_all(., "Ã©", "é") %>% str_replace_all(., "Ã¤", "ä") %>% str_replace_all(., "Ã¶", "ö")
+
+nombres_normales <- c("Alonso", "Bottas", "Gasly", "Giovinazzi", "Hamilton", "Latifi", "Leclerc", "Mazepin", "Norris", "Ocon", "Pérez", "Räikkönen", "Ricciardo", "Russell", "Sainz", "Schumacher", "Stroll", "Tsunoda", "Verstappen", "Vettel")
+
+pilotos_2021 <-  full_join(carreras, resultados, c("raceId" = "raceId") ) %>% 
+  full_join(.,pilotos, c("driverId"="driverId")) %>% 
+  filter(year=="2021") %>% 
+  select(forename,surname, year) %>% distinct(forename,surname) %>% na.omit() %>% arrange(surname) %>% add_column(nombres_normales) 
+
+#--------------------------
+#temporada 2021 templos
+
+carreras_21 <- full_join(carreras,circuitos, c("circuitId" = "circuitId")) %>%
+  filter(year=="2021") %>%
+  select(round, name.x, name.y, date, location,country, lat, lng, alt) %>%
+  arrange(round) %>% 
+  mutate(round2 = round) 
+
+carreras_21_v2 <- carreras_21[, c(1, 4, 10, 2, 3, 5, 6, 7, 8, 9)]
+carreras_21_v2 <- carreras_21_v2%>%  unite(. ,variables, c(1, 5, 7), sep = "; ")
+
+
+#----------------------------------
+#el nano contra todos
+
+
+alovsall <- full_join(pilotos, resultados, c ("driverId" = "driverId")) %>%  select(driverRef, resultId, raceId, constructorId, position, points) %>% full_join(., escuderias, c ("constructorId" = "constructorId")) %>% select(driverRef, resultId, raceId, constructorId, position, position, points, name) %>% full_join(., carreras, c ("raceId" = "raceId")) %>% select(driverRef, resultId, raceId, constructorId, position, position, points, name.x, year, round)
+
+#alo_vs_marques <- alovsall %>% filter(year == 2001, driverRef %in% c("alonso", "marques"), round <= 14)
+
+alo_vs_trulli <- alovsall %>% filter(year %in% c(2003, 2004), driverRef %in% c("alonso", "trulli")) %>% slice(1:15, 17:67) %>% group_by(driverRef, year) %>% mutate(puntos_acumulados = cumsum(points)) %>% ungroup()
+
+alo_vs_fisichella <- alovsall %>% filter(year %in% c(2005, 2006), driverRef %in% c("alonso", "fisichella"))  %>% group_by(driverRef, year) %>% mutate(puntos_acumulados = cumsum(points)) %>% ungroup()
+
+alo_vs_hamilton <- alovsall %>% filter(year %in% c(2007) ,driverRef %in% c("alonso", "hamilton"))  %>% group_by(driverRef, year) %>% mutate(puntos_acumulados = cumsum(points)) %>% ungroup()
+
+alo_vs_piquet <- alovsall %>% filter(year %in% c(2008, 2009), driverRef %in% c("alonso", "piquet_jr")) %>% slice(1:28, 36:63) %>% group_by(driverRef, year) %>% mutate(puntos_acumulados = cumsum(points)) %>% ungroup()
+
+#alo_vs_grosjean <- alovsall %>% filter(year == 2009, driverRef %in% c("alonso", "grosjean"), round >= 11)
+
+alo_vs_massa <- alovsall %>% filter(year %in% c(2010, 2011, 2013), driverRef %in% c("alonso", "massa")) %>% group_by(driverRef, year) %>% mutate(puntos_acumulados = cumsum(points)) %>% ungroup()
+
+alo_vs_raikkonen <- alovsall %>% filter(year == 2014, driverRef %in% c("alonso", "raikkonen")) %>% group_by(driverRef, year) %>% mutate(puntos_acumulados = cumsum(points)) %>% ungroup()
+
+alo_vs_button <- alovsall %>% filter(year %in% c(2015, 2016), driverRef %in% c("alonso", "button")) %>% group_by(driverRef, year) %>% mutate(puntos_acumulados = cumsum(points)) %>% ungroup()
+
+alo_vs_vandoorne <- alovsall %>% filter(year %in% c(2017, 2018), driverRef %in% c("alonso", "vandoorne")) %>% slice(1:45, 47:81) %>% group_by(driverRef, year) %>% mutate(puntos_acumulados = cumsum(points))%>% ungroup() 
+
+alo_vs_ocon <- alovsall %>% filter(year == 2021, driverRef %in% c("alonso", "ocon")) %>% group_by(driverRef, year) %>% mutate(puntos_acumulados = cumsum(points)) %>% ungroup()
+
+ALO_VS_ALL <- full_join(alo_vs_trulli, alo_vs_fisichella, c("driverRef"= "driverRef", "resultId" = "resultId", "raceId" = "raceId", "constructorId" = "constructorId", "position" = "position", "points" = "points", "name.x" = "name.x", "year" = "year", "round" = "round" , "puntos_acumulados" = "puntos_acumulados")) %>% 
+  full_join(., alo_vs_hamilton, c("driverRef"= "driverRef", "resultId" = "resultId", "raceId" = "raceId", "constructorId" = "constructorId", "position" = "position", "points" = "points", "name.x" = "name.x", "year" = "year", "round" = "round", "puntos_acumulados" = "puntos_acumulados")) %>% 
+  full_join(., alo_vs_piquet, c("driverRef"= "driverRef", "resultId" = "resultId", "raceId" = "raceId", "constructorId" = "constructorId", "position" = "position", "points" = "points", "name.x" = "name.x", "year" = "year", "round" = "round", "puntos_acumulados" = "puntos_acumulados")) %>% 
+  full_join(., alo_vs_massa, c("driverRef"= "driverRef", "resultId" = "resultId", "raceId" = "raceId", "constructorId" = "constructorId", "position" = "position", "points" = "points", "name.x" = "name.x", "year" = "year", "round" = "round", "puntos_acumulados" = "puntos_acumulados"))  %>% 
+  full_join(., alo_vs_raikkonen, c("driverRef"= "driverRef", "resultId" = "resultId", "raceId" = "raceId", "constructorId" = "constructorId", "position" = "position", "points" = "points", "name.x" = "name.x", "year" = "year", "round" = "round", "puntos_acumulados" = "puntos_acumulados")) %>% 
+  full_join(., alo_vs_button, c("driverRef"= "driverRef", "resultId" = "resultId", "raceId" = "raceId", "constructorId" = "constructorId", "position" = "position", "points" = "points", "name.x" = "name.x", "year" = "year", "round" = "round", "puntos_acumulados" = "puntos_acumulados")) %>% 
+  full_join(., alo_vs_vandoorne, c("driverRef"= "driverRef", "resultId" = "resultId", "raceId" = "raceId", "constructorId" = "constructorId", "position" = "position", "points" = "points", "name.x" = "name.x", "year" = "year", "round" = "round", "puntos_acumulados" = "puntos_acumulados")) %>% 
+  full_join(., alo_vs_ocon, c("driverRef"= "driverRef", "resultId" = "resultId", "raceId" = "raceId", "constructorId" = "constructorId", "position" = "position", "points" = "points", "name.x" = "name.x", "year" = "year", "round" = "round", "puntos_acumulados" = "puntos_acumulados"))
+
+
+#------------------------------
+#el nano contra hamilton
+fotos_ALO_vs_HAM <- c("./imagenes/pilotos/alonso.png", "./imagenes/pilotos/hamilton.png")
+fotos_esp_ing <- c("./imagenes/paises/espanya.png", "./imagenes/paises/uk.png")
+n_carreras_alo_ham <- n_carreras_nom %>% filter(driverRef %in% c("alonso", "hamilton"))
+
+n_victorias_alo_ham <- victorias_con_nombre %>% filter(driverRef %in% c("alonso", "hamilton"))
+
+alo_vs_ham <- full_join(n_carreras_alo_ham, n_victorias_alo_ham, c("driverRef"= "driverRef")) %>% select( driverRef, numero_carreras, n_victorias) %>% add_column(fotos_esp_ing, fotos_ALO_vs_HAM) 
+```
+
+
+## Evolución de los coches
+
+<div class='left' style='float:left;width:55%'>
+
+```{r, fig.align="center",echo=FALSE, warning=FALSE}
+coche1950 <- image_read("./imagenes/coches/1950.jpg") %>% image_scale(., "500") %>%  image_annotate(., "1950", size = 60, gravity = "southwest", color = "cyan", boxcolor = "gray13")
+coche1960 <- image_read("./imagenes/coches/1960.jpg") %>% image_scale(., "500")%>%  image_annotate(., "1960", size = 60, gravity = "southwest", color = "cyan", boxcolor = "gray13")
+coche1970 <- image_read("./imagenes/coches/1970.jpg") %>% image_scale(., "500")%>%  image_annotate(., "1970", size = 60, gravity = "southwest", color = "cyan", boxcolor = "gray13")
+coche1980 <- image_read("./imagenes/coches/1980.jpg") %>% image_scale(., "500")%>%  image_annotate(., "1980", size = 60, gravity = "southwest", color = "cyan", boxcolor = "gray13")
+coche1990 <- image_read("./imagenes/coches/1990.jpg") %>% image_scale(., "500")%>%  image_annotate(., "1990", size = 60, gravity = "southwest", color = "cyan", boxcolor = "gray13")
+coche2005 <- image_read("./imagenes/coches/2005.jpg") %>% image_scale(., "500")%>%  image_annotate(., "2005", size = 60, gravity = "southwest", color = "cyan", boxcolor = "gray13")
+coche2020 <- image_read("./imagenes/coches/2020.jpg") %>% image_scale(., "500")%>%  image_annotate(., "2020", size = 60, gravity = "southwest", color = "cyan", boxcolor = "gray13")
+coches <- c(coche1950, coche1960, coche1970, coche1980, coche1990, coche2005, coche2020)
+
+image_animate(image_scale(coches), fps = 0.5)
+```
+
+</div>
+
+<div class='right' style='float:right;width:35%'>
+
+### Siempre en busca de:
+
+#### Aerodinámica
+
+#### Eficiencia
+
+#### Seguridad
+
+</div>
+
+
+## Capítulo oscuro del deporte
+
+Las grandes mejoras en seguridad han supuesto un enorme descenso en los accidentes mortales
+
+<center> 
+
+```{r fig.align="center",echo=FALSE, warning=FALSE}
+gg_muertes <- ggplot(muertesf1_final, aes(x = fecha_muerte, y = muertesxanyo )) +  geom_bar(stat = "identity", fill = "white", colour = "white") + geom_smooth(colour = "cyan", se = FALSE) + labs(x = "Año" , y = "Número de muertes")  + theme(axis.line = element_line(colour = "white"),
+    axis.ticks = element_line(colour = "white"),
+    panel.grid.major = element_line(colour = "gray13"),
+    panel.grid.minor = element_line(colour = "gray13"),
+    axis.title = element_text(colour = "white"),
+    axis.text = element_text(colour = "white"),
+    plot.title = element_text(colour = "white"),
+    panel.background = element_rect(fill = "gray13",
+        colour = "white"), plot.background = element_rect(fill = "gray13")) +labs(colour = "white") + theme(panel.grid.major = element_line(colour = "gray38",
+    linetype = "dotted"), panel.grid.minor = element_line(colour = NA),
+    plot.title = element_text(size = 25,
+        hjust = 0.5)) +labs(title = "Accidentes mortales por año") + geom_text(data = data.frame(x = 2004.10522642875, y = 0.237450516942241, 
+    label = "Tendencia negativa"), mapping = aes(x = x, y = y, 
+    label = label), colour = "cyan", inherit.aes = FALSE, size = 3)
+
+ggplotly(gg_muertes)
+```
+
+</center> 
+
+
+
+## Audiencias
+
+<div class='left' style='float:left;width:70%'>
+
+
+
+```{r fig.align="center",echo=FALSE, warning=FALSE}
+audiencias <- rio::import(file = "./datos/audienciasF1.csv")
+
+
+gg_audiencias <- ggplot(audiencias, aes(x=year, y= numero_espectadores)) +
+  geom_area() +
+  geom_point( size=1.5, color="cyan", fill=alpha("cyan", 8), shape=21, stroke=2) +  
+  geom_line(color="#69b3a2", size=1) +
+  scale_x_continuous(
+    breaks = seq(2004, 2020, 1),
+    limits = c(2003, 2021)) + labs(x = "Año", y = "Numero de espectadores" )  + theme(panel.background = element_rect(fill = "gray13"),
+    plot.background = element_rect(fill = "gray13")) + theme(axis.line = element_line(colour = "white"),
+    panel.grid.major = element_line(colour = "gray20"),
+    panel.grid.minor = element_line(colour = "gray20"),
+    axis.text = element_text(colour = "white"),
+    legend.position = "none") + theme(axis.title = element_text(colour = "white"),
+    plot.title = element_text(colour = "white",
+        hjust = 0.5)) +labs(title = "Evolución de la audiencia",
+    colour = "white") + theme(axis.text.x = element_text(size = 4))
+
+
+ggplotly(gg_audiencias)
+```
+
+</div>
+
+<div class='right' style='float:right;width:29%'>
+
+Muy marcado el paso a las televisiones de pago y la retirada momentánea de Alonso.
+
+</div> 
+
+## Presupuestos
+
+<center>
+
+```{r, message=FALSE, warning=FALSE}
+presupuestos <- read_excel("datos/presupuestos.xlsx")
+
+gg_presup <- ggplot(presupuestos, aes(year, Presupuesto, color = Escuderia)) + 
+  geom_point() + geom_line() + 
+  labs(x = "Año", y = "Presupuesto en €" ) +
+    scale_x_continuous(
+    breaks = seq(2015, 2023, 1),
+    limits = c(2014, 2024)) + 
+  scale_y_continuous( breaks = seq(0, 700000000, 100000000),
+    limits = c(0, 600000000))  + theme(axis.ticks = element_line(colour = "white"),
+    panel.grid.major = element_line(colour = "white",
+        linetype = "blank"), panel.grid.minor = element_line(colour = "white",
+        linetype = "blank"), axis.title = element_text(size = 14,
+        face = "bold", colour = "cyan", vjust = 0.75),
+    axis.text = element_text(colour = "white"),
+    plot.title = element_text(size = 16,
+        face = "bold", colour = "cyan", hjust = 0.5,
+        vjust = 0.75), legend.text = element_text(face = "bold",
+        colour = "cyan"), legend.title = element_text(size = 13,
+        face = "bold", colour = "cyan"),
+    panel.background = element_rect(fill = "gray13",
+        colour = "white"), plot.background = element_rect(fill = "gray13"),
+    legend.key = element_rect(fill = "gray13"),
+    legend.background = element_rect(fill = "gray13")) +labs(title = "PRESUPUESTO DE CADA EQUIPO POR TEMPORADA") + theme(panel.grid.major = element_line(colour = NA),
+    panel.grid.minor = element_line(colour = NA),
+    axis.title = element_text(size = 11),
+    plot.title = element_text(size = 14),
+    legend.text = element_text(size = 9),
+    legend.title = element_text(size = 11),
+    panel.background = element_rect(fill = "gray13",
+        colour = NA), plot.background = element_rect(fill = "gray13",
+        colour = NA)) + theme(legend.key = element_rect(fill = "gray13"),
+    legend.background = element_rect(fill = "gray13")) + theme(axis.line = element_line(colour = "gray20",
+    linetype = "solid"), panel.grid.major = element_line(colour = "gray15",
+    linetype = "solid"))
+ 
+ggplotly(gg_presup) #para que sea interactivo
+```
+
+</center>
+
+<div class='left' style='float:left;width:48%'>
+
+#### Años anteriores con enorme desigualdad presupuestaria. --> 
+
+#### Pocas escuderías en la lucha por el título             -->
+
+</div>
+
+<div class='right' style='float:right;width:40%'>
+
+#### Reunificación de presupuestos
+
+#### Se esperan muchos candidatos al título
+
+</div>
+
+## Nacionalidades
+
+<center>
+
+```{r, message=FALSE, warning=FALSE}
+ggplotly(gg_pilotos_por_paises)
+```
+
+</center>
+
+## Mayor número de victorias
+
+```{r, warning=FALSE, message=FALSE}
+ggplot(victorias2, aes(x = reorder(driverRef,suma_vic), suma_vic)) + 
+  geom_line(size=5, colour = "cyan") +
+  coord_flip() +
+  theme(plot.subtitle = element_text(hjust = 0.5),
+    plot.caption = element_text(size = 15,
+        colour = "white", hjust = 0), axis.line = element_line(colour = "gray20",
+        linetype = "solid"), panel.grid.major = element_line(linetype = "blank"),
+    panel.grid.minor = element_line(linetype = "blank"),
+    axis.title = element_text(colour = "cyan"),
+    axis.text = element_text(colour = "cyan"),
+    axis.text.x = element_text(colour = "white"),
+    axis.text.y = element_text(colour = "white"),
+    plot.title = element_text(size = 17,
+        colour = "white", hjust = 0.5), panel.background = element_rect(fill = "gray13",
+        colour = "gray13", linetype = "solid"),
+    plot.background = element_rect(fill = "gray13",
+        colour = "gray13", linetype = "solid")) +labs(title = 'Pilotos con más victorias' ,x = "Pilotos",
+    y = "Nº victorias") + theme(plot.subtitle = element_text(colour = "gray50"),
+    plot.title = element_text(face = "bold",
+        colour = "cyan")) +labs(title = "PILOTOS CON MÁS VICTORIAS",
+    subtitle = ) + transition_reveal(date)
+```
+
+## Remando a contracorriente
+
+
+Sólo unos cuántos afortunados han sido capaces de salir últimos y acabar en el podium
+
+```{r, eval = TRUE, echo = FALSE, message=FALSE, warning=FALSE}
+trulli <- readPNG("./imagenes/pilotos/trulli.png")
+kovalainen <- readPNG("./imagenes/pilotos/kovalainen.png")
+vettel <- readPNG("./imagenes/pilotos/vettel.png")
+raikkonen <- readPNG("./imagenes/pilotos/raikkonen.png")
+schumacher <- readPNG("./imagenes/pilotos/schumacher.png")
+hamilton <- readPNG("./imagenes/pilotos/hamilton.png")
+montoya <- readPNG("./imagenes/pilotos/montoya.png")
+alonso <- readPNG("./imagenes/pilotos/alonso.png")
+
+trulli_grob <- rasterGrob(trulli, interpolate=TRUE)
+kovalainen_grob <- rasterGrob(kovalainen, interpolate=TRUE)
+vettel_grob <- rasterGrob(vettel, interpolate=TRUE)
+raikkonen_grob <- rasterGrob(raikkonen, interpolate=TRUE)
+schumacher_grob <- rasterGrob(schumacher, interpolate=TRUE)
+hamilton_grob <- rasterGrob(hamilton, interpolate=TRUE)
+montoya_grob <- rasterGrob(montoya, interpolate=TRUE)
+alonso_grob <- rasterGrob(alonso, interpolate=TRUE)
+
+
+ggremontados <- ggplot(puestos_remont_piloto_recient, aes(x = reorder(driverRef, remontados), remontados))  + geom_bar(stat = "identity") + coord_flip() + labs(x = "Pilotos", y = "Nº de puestos remontados" ) + annotation_custom(alonso_grob, xmin= -15, xmax=17, ymin= 18, ymax=20) +
+  annotation_custom(kovalainen_grob, xmin= -20, xmax=24, ymin= 18.65, ymax=20) +
+  annotation_custom(montoya_grob, xmin= -26.7, xmax=33, ymin= 18, ymax=21.2) +
+  annotation_custom(trulli_grob, xmin= -32, xmax=40., ymin= 18.3, ymax=19.55) +
+  annotation_custom(hamilton_grob, xmin= -32, xmax=42.2, ymin= 19, ymax=21.8) +
+  annotation_custom(schumacher_grob, xmin= -32, xmax=44.1, ymin= 19.2, ymax=20.5) +
+  annotation_custom(raikkonen_grob, xmin= -32, xmax=46.1, ymin= 19, ymax=21) +
+  annotation_custom(vettel_grob, xmin= -32, xmax=48.1, ymin= 19, ymax=21.2) +
+    theme(axis.line = element_line(colour = "white"),
+    axis.ticks = element_line(colour = NA),
+    panel.grid.major = element_line(colour = "cyan",
+        linetype = "blank"), panel.grid.minor = element_line(colour = "gray20"),
+    axis.title = element_text(face = "bold",
+        colour = "gray50"), axis.text = element_text(size = 11,
+        colour = "cyan"), axis.text.x = element_text(colour = "cyan"),
+    axis.text.y = element_text(colour = "cyan"),
+    plot.title = element_text(size = 15,
+        face = "bold", colour = "cyan", hjust = 0.45,
+        vjust = 0.75), panel.background = element_rect(fill = "gray13",
+        linetype = "solid"), plot.background = element_rect(fill = "gray13",
+        colour = "cyan", linetype = "solid")) +labs(title = "MAYORES REMONTADAS EN LA HISTORIA")
+  
+
+ggremontados
+
+```
+
+
+## Mundiales por escuderias y pilotos {.tabset}
+
+### Por tamaño
+
+```{r, message=FALSE, warning=FALSE, include=FALSE}
+#datos de escuderias pa quien quiera hacer algo
+escuderias <- rio::import(file = "./datos/constructors.csv")
+escuderias2 <- rio::import(file = "./datos/constructor_standings.csv")
+result_escuderias <- rio::import(file = "./datos/constructor_results.csv")
+
+pilotos <- rio::import(file = "./datos/drivers.csv")
+resultados <- rio::import(file = "./datos/results.csv")
+carreras <- rio::import(file = "./datos/races.csv")
+#escuderiasesp <- escuderias %>% filter(nationality == "Spanish") #escuderias españolas
+
+campeones_esc <- full_join(pilotos, resultados, c("driverId" = "driverId")) %>% full_join(., carreras, c("raceId" = "raceId")) %>% select(driverId, driverRef, nationality, constructorId, points, year, round) %>% full_join(., escuderias, c("constructorId" = "constructorId")) %>% select(driverId, driverRef, nationality.x, constructorId, points, year, name, round) %>%  group_by(year, driverRef) %>%  mutate(puntos_totales = cumsum(points)) %>% ungroup() %>% group_by(year) %>% slice_max(puntos_totales, n=1) %>% select(name, driverRef) %>% group_by(name, driverRef) %>% mutate(total_camp = sum( NN = n())) %>% arrange(name) 
+
+
+
+
+library(treemap)
+library(d3treeR)
+
+
+# basic treemap
+gg_esc_campeones <- treemap(campeones_esc,
+            index=c("name","driverRef"),
+            vSize="total_camp",
+            type="index",
+            vColor = "name",
+            fontsize.labels=c(15,20),
+            bg.labels=c("transparent"),
+            palette = "Set2",
+            align.labels=list(
+              c("center", "center"), 
+              c("center", "bottom")),
+            title = "Escuderías con más campeones",
+            title.legend = "Escuderías")   
+
+```
+
+<center>
+
+```{r, message=FALSE, warning=FALSE}
+
+inter_camp <- d3tree2(gg_esc_campeones ,  rootname = "Escuderías y Campeones")
+inter_camp
+
+```
+
+</center>
+
+
+### En valores absolutos
+
+<center>
+
+```{r, message=FALSE, warning=FALSE}
+campeones_esc <- full_join(pilotos, resultados, c("driverId" = "driverId")) %>% full_join(., carreras, c("raceId" = "raceId")) %>% select(driverId, driverRef, nationality, constructorId, points, year, round) %>% full_join(., escuderias, c("constructorId" = "constructorId")) %>% select(driverId, driverRef, nationality.x, constructorId, points, year, name, round) %>%  group_by(year, driverRef) %>%  mutate(puntos_totales = cumsum(points)) %>% ungroup() %>% group_by(year) %>% slice_max(puntos_totales, n=1) %>% ungroup() %>% count(name) %>% arrange(desc(n))
+
+campeones_esc$n=as.factor(campeones_esc$n)
+
+gg_campeones_es <- ggplot(campeones_esc, aes(x=name, y=n)) +
+  geom_bar(stat="identity", width=2, color="white") + 
+  theme(axis.line = element_line(colour = "gray13"),
+    axis.ticks = element_line(colour = "gray13"),
+    panel.grid.major = element_line(colour = "gray13"),
+    panel.grid.minor = element_line(colour = "gray13"),
+    axis.title = element_text(family = "Bookman",
+        size = 8, face = "bold"), axis.text = element_text(face = "bold",
+        colour = "cyan"), axis.text.x = element_text(colour = "gray13"),
+    axis.text.y = element_text(colour = "gray13"),
+    plot.title = element_text(family = "Bookman",
+        size = 14, face = "bold", colour = "cyan", hjust=0.5),
+    legend.text = element_text(size = 9,
+        face = "bold", colour = "cyan"),
+    legend.title = element_text(size = 8,
+        face = "bold", colour = "gray13"),
+    panel.background = element_rect(fill = "gray13",
+        colour = "gray13", linetype = "solid"),
+    plot.background = element_rect(fill = "gray13",
+        colour = "gray13", linetype = "solid"),
+    legend.key = element_rect(fill = "cyan"),
+    legend.background = element_rect(fill = "gray13")) +labs(title = "CAMPEONATOS POR ESCUDERIA",
+    x = NULL, y = NULL)
+
+
+ggplotly(gg_campeones_es)
+```
+
+</center>
+
+## Mundiales por pilotos y nacionalidad  
+
+<center>
+```{r, message=FALSE, warning=FALSE}
+
+id <- rownames(campeones)
+campeones <- cbind(id=id, campeones)
+campeones[, c(1)] <- sapply(campeones[, c(1)], as.numeric)
+
+label_campeones <- campeones
+number_of_bar <- nrow(label_campeones)
+
+angle <- 90 - 360 * (label_campeones$id-0.5) /number_of_bar    
+label_campeones$hjust <- ifelse( angle < -90, 1, 0)
+label_campeones$angle <- ifelse(angle < -90, angle+180, angle)
+
+base_campeones <- campeones %>% 
+  group_by(nationality.x) %>% 
+  summarise(start=min(id), end=max(id)) %>% 
+  rowwise() %>% 
+  mutate(title=mean(c(start, end)))
+
+grid_campeones <- base_campeones
+grid_campeones$end <- grid_campeones$end[ c( nrow(grid_campeones), 1:nrow(grid_campeones)-1)] + 1
+grid_campeones$start <- grid_campeones$start - 1
+grid_campeones <- grid_campeones[-1,]
+
+gg_circ_victorias <- ggplot(campeones, aes(x=as.factor(year), y=total_campeonatos, fill=nationality.x, color = nationality.x)) + geom_bar(aes(x=as.factor(id), y=total_campeonatos, fill=nationality.x), stat="identity", alpha=0.5) +
+  
+  geom_segment(data=grid_campeones, aes(x = 0, y = 8, xend = 32, yend = 8), colour = "grey", alpha=1, size=0.3 , inherit.aes = FALSE ) +
+  geom_segment(data=grid_campeones, aes(x = 0, y = 6, xend = 32, yend = 6), colour = "grey", alpha=1, size=0.3 , inherit.aes = FALSE ) +
+  geom_segment(data=grid_campeones, aes(x = 0, y = 4, xend = 32, yend = 4), colour = "grey", alpha=1, size=0.3 , inherit.aes = FALSE ) +
+  geom_segment(data=grid_campeones, aes(x = 0, y = 2, xend = 32, yend = 2), colour = "grey", alpha=1, size=0.3 , inherit.aes = FALSE ) +
+  
+  annotate("text", x = rep(max(campeones$id),4), y = c(2, 4, 6, 8), label = c("2", "4", "6", "8") , color="white", size=3 , angle=0, fontface="bold", hjust=1) +
+  
+   geom_bar(aes(x=as.factor(id), y=total_campeonatos, fill=nationality.x), stat="identity", alpha=0.5) +
+  ylim(-10,21) +
+  theme_minimal() +
+  theme(
+    legend.position = "none",
+    axis.text = element_blank(),
+    axis.title = element_blank(),
+    panel.grid = element_blank(),
+    plot.margin = unit(rep(-1,4), "cm") ) +
+  coord_polar() + 
+  geom_text(data=label_campeones, aes(x=id, y=10, label=driverRef, hjust=hjust), color="white", fontface="bold",alpha=0.6, size=3.5, angle= label_campeones$angle, inherit.aes = FALSE ) +
+
+  geom_segment(data=grid_campeones, aes(x = 0.70, y = -1, xend = 2.45, yend = -1), colour = "white", alpha=1, size=0.3 , inherit.aes = FALSE )  +
+  geom_segment(data=grid_campeones, aes(x = 2.6, y = -1, xend = 3.55, yend = -1), colour = "white", alpha=1, size=0.3 , inherit.aes = FALSE ) +
+  geom_segment(data=grid_campeones, aes(x = 3.65, y = -1, xend = 5.45, yend = -1), colour = "white", alpha=1, size=0.3 , inherit.aes = FALSE ) +
+  geom_segment(data=grid_campeones, aes(x = 5.55, y = -1, xend = 7.35, yend = -1), colour = "white", alpha=1, size=0.3 , inherit.aes = FALSE ) +
+  geom_segment(data=grid_campeones, aes(x = 7.5, y = -1, xend = 10.50, yend = -1), colour = "white", alpha=1, size=0.3 , inherit.aes = FALSE ) +
+  geom_segment(data=grid_campeones, aes(x = 10.7, y = -1, xend = 19.20, yend = -1), colour = "white", alpha=1, size=0.3 , inherit.aes = FALSE ) +
+  geom_segment(data=grid_campeones, aes(x = 19.4, y = -1, xend = 20.3, yend = -1), colour = "white", alpha=1, size=0.3 , inherit.aes = FALSE ) +
+  geom_segment(data=grid_campeones, aes(x = 20.45, y = -1, xend = 23.4, yend = -1), colour = "white", alpha=1, size=0.3 , inherit.aes = FALSE ) + 
+  geom_segment(data=grid_campeones, aes(x = 23.65, y = -1, xend = 24.35, yend = -1), colour = "white", alpha=1, size=0.3 , inherit.aes = FALSE ) + 
+  geom_segment(data=grid_campeones, aes(x = 24.60, y = -1, xend = 27, yend = -1), colour = "white", alpha=1, size=0.3 , inherit.aes = FALSE ) +
+  geom_segment(data=grid_campeones, aes(x = 27.2, y = -1, xend = 29.5, yend = -1), colour = "white", alpha=1, size=0.3 , inherit.aes = FALSE ) +
+  geom_segment(data=grid_campeones, aes(x = 29.7, y = -1, xend = 30.5, yend = -1), colour = "white", alpha=1, size=0.3 , inherit.aes = FALSE ) + 
+  geom_segment(data=grid_campeones, aes(x = 30.7, y = -1, xend = 31.5, yend = -1), colour = "white", alpha=1, size=0.3 , inherit.aes = FALSE ) +
+  geom_segment(data=grid_campeones, aes(x = 31.7, y = -1, xend = 32.5, yend = -1), colour = "white", alpha=1, size=0.3 , inherit.aes = FALSE ) +
+  geom_segment(data=grid_campeones, aes(x = 32.7, y = -1, xend = 33.5, yend = -1), colour = "white", alpha=1, size=0.3 , inherit.aes = FALSE ) + theme(legend.text = element_text(colour = "white"),
+    legend.title = element_text( colour = "white"), 
+     legend.background = element_rect(fill = "gray13", colour = "gray13"),
+    legend.key = element_rect(fill = "gray13"),
+    legend.position = "right",
+    panel.background = element_rect(fill = "gray13" , colour = "gray13"),
+    plot.background = element_rect(fill = "gray13" , colour = "gray13"))+labs(colour = "Nacionalidad", fill = "Nacionalidad")
+#gg_circ_victorias
+#las siguientes lineas de codigo se utilizan para eliminar los bordes blancos
+ggsave("./plots/gg_circ_victorias.png", width = 8, height = 5)
+
+```
+
+</center>
+
+<center>
+
+![](./plots/gg_circ_victorias.png){width=800 height=600}
+
+</center>
+
+
+## 3.3 Temporada 2021
+
+### Campeón del mundo
+
+
+
+
+
+<div class='left' style='float:left;width:48%'>
+
+![](./imagenes/CAMPEON/campeon_verstappen.jpg){width=400 height=625}
+
+</div>
+
+
+<div class='right' style='float:right;width:48%'>
+
+```{r, message=FALSE, warning=FALSE}
+
+salida <- image_read("./imagenes/CAMPEON/hamilton_adel.jpg") %>% image_scale(., "500")%>%  image_annotate(., "Hamilton se pone por delante", size = 20, gravity = "northwest", color = "cyan", boxcolor = "gray13")
+latifi <- image_read("./imagenes/CAMPEON/latifi.jpg") %>% image_scale(., "500")%>%  image_annotate(., "Accidente de Latifi", size = 40, gravity = "northwest", color = "cyan", boxcolor = "gray13")
+safety <- image_read("./imagenes/CAMPEON/safety.jpg") %>% image_scale(., "500")%>%  image_annotate(., "Sale el safety car", size = 40, gravity = "northwest", color = "cyan", boxcolor = "gray13")
+rueda_a_rueda <- image_read("./imagenes/CAMPEON/ruedaarueda.jpeg") %>% image_scale(., "500")%>%  image_annotate(., "Igualdad máxima", size = 30, gravity = "northwest", color = "cyan", boxcolor = "gray13")
+meta <- image_read("./imagenes/CAMPEON/verstappen_gana.jpg") %>% image_scale(., "500")%>%  image_annotate(., "Verstappen se hace con la victoria", size = 20, gravity = "northwest", color = "cyan", boxcolor = "gray13")
+trofeo <- image_read("./imagenes/CAMPEON/campeon_trofeo.jpg") %>% image_scale(., "500")%>%  image_annotate(., "Nuevo campeón del mundo", size = 30, gravity = "northwest", color = "cyan", boxcolor = "gray13")
+last_race <- c(salida, latifi, safety, rueda_a_rueda, meta, trofeo)
+
+image_animate(image_scale(last_race), fps = 0.5)
+```
+
+Uno de los finales más apasionantes en la historia de la Formula 1
+
+</div>
+
+## Lucha por el título
+
+<center>
+
+Empatados a puntos en la última carrera
+
+```{r, message=FALSE, warning=FALSE}
+vers_vs_ham <- data.frame(
+  "nombre" = c("Max Verstappen", "Lewis Hamilton"),
+  "piloto" = c("./imagenes/pilotos/verstappen.jpg","./imagenes/pilotos/hamilton.png"),
+  "pais" = c("./imagenes/paises/holanda.png", "./imagenes/paises/uk.png"),
+  "escuderia" = c("./imagenes/escuderias/redbull.png", "./imagenes/escuderias/mercedes.png"),
+  "puntos" = c(395.5, 387.5),
+  "victorias" = c(10, 8),
+  "podiums" = c(18, 17),
+  "poles" = c(10, 5),
+  "vueltas_rapidas" = c(6, 6))
+  
+
+ 
+tabla_ver_ham <- vers_vs_ham %>% gt() %>% 
+  text_transform( locations = cells_body(columns = c(piloto)), fn = function(x) {gt::local_image(x, height = 80)}) %>% 
+  text_transform( locations = cells_body(columns = c(pais)), fn = function(x) {gt::local_image(x, height = 60)}) %>%  
+  text_transform( locations = cells_body(columns = c(escuderia)), fn = function(x) {gt::local_image(x, height = 80)}) %>% 
+  tab_header(title = md("**Verstappen vs Hamilton**"), subtitle = md("2021")) %>%   cols_label(
+    nombre = html(""),
+    piloto = html(""),
+    pais = html(""),
+    escuderia = html("Escudería"),
+    puntos = html("Puntos"),
+    victorias = html("Victorias"),
+    podiums = html("Podiums"),
+    poles = html("Poles"),
+    vueltas_rapidas = html("Vueltas rápidas")) %>%  
+  tab_options(table.background.color = "gray13",   table.font.color.light = "cyan") %>% 
+  cols_align(align = "center",
+  columns = everything())
+
+
+tabla_ver_ham
+```
+
+</center>
+
+
+## Parrilla de pilotos 
+
+<center>
+
+```{r, warning=FALSE, message=FALSE}
+
+
+pilotos_2021 <- full_join(carreras, resultados, c("raceId" = "raceId") ) %>% 
+  full_join(.,pilotos, c("driverId"="driverId")) %>% 
+  filter(year=="2021") %>% 
+  select(forename,surname, year) %>% distinct(forename,surname) %>% na.omit() %>% arrange(surname) %>% str_replace_all(., "Ã©", "é") %>% str_replace_all(., "Ã¤", "ä") %>% str_replace_all(., "Ã¶", "ö")
+
+nombres_normales <- c("Alonso", "Bottas", "Gasly", "Giovinazzi", "Hamilton", "Latifi", "Leclerc", "Mazepin", "Norris", "Ocon", "Pérez", "Räikkönen", "Ricciardo", "Russell", "Sainz", "Schumacher", "Stroll", "Tsunoda", "Verstappen", "Vettel")
+
+pilotos_2021 <-  full_join(carreras, resultados, c("raceId" = "raceId") ) %>% 
+  full_join(.,pilotos, c("driverId"="driverId")) %>% 
+  filter(year=="2021") %>% 
+  select(forename,surname, year) %>% distinct(forename,surname) %>% na.omit() %>% arrange(surname) %>% add_column(nombres_normales)  
+ 
+
+# PÃ©rez
+# RÃ¤ikkÃ¶nen
+fotos_pil_2021 <- c("./imagenes/pilotos/alonso.png", "./imagenes/pilotos/bottas.png", "./imagenes/pilotos/gasly.png", "./imagenes/pilotos/giovinazzi.jpg", "./imagenes/pilotos/hamilton.png", "./imagenes/pilotos/latifi.png", "./imagenes/pilotos/leclerc.png", "./imagenes/pilotos/mazepin.png", "./imagenes/pilotos/norris.png", "./imagenes/pilotos/ocon.jpg", "./imagenes/pilotos/perez.png", "./imagenes/pilotos/raikkonen.png", "./imagenes/pilotos/ricciardo.png", "./imagenes/pilotos/russell.png", "./imagenes/pilotos/sainz.png", "./imagenes/pilotos/mick.png", "./imagenes/pilotos/stroll.png", "./imagenes/pilotos/tsunoda.png", "./imagenes/pilotos/verstappen.jpg", "./imagenes/pilotos/vettel.png")
+
+fotos_pais_2021 <- c("./imagenes/paises/espanya.png", "./imagenes/paises/finlandia.png", "./imagenes/paises/francia.png", "./imagenes/paises/italia.png","./imagenes/paises/uk.png", "./imagenes/paises/canada.png","./imagenes/paises/monaco.png", "./imagenes/paises/rusia.png","./imagenes/paises/uk.png", "./imagenes/paises/francia.png","./imagenes/paises/mexico.png", "./imagenes/paises/finlandia.png","./imagenes/paises/australia.png", "./imagenes/paises/uk.png","./imagenes/paises/espanya.png", "./imagenes/paises/alemania.png","./imagenes/paises/canada.png", "./imagenes/paises/japon.png","./imagenes/paises/holanda.png", "./imagenes/paises/alemania.png")
+
+fotos_esc_2021 <- c("./imagenes/escuderias/alpine.png","./imagenes/escuderias/mercedes.png","./imagenes/escuderias/alphatauri.png", "./imagenes/escuderias/alfaromeo.jpg","./imagenes/escuderias/mercedes.png", "./imagenes/escuderias/williams.png","./imagenes/escuderias/ferrari.png", "./imagenes/escuderias/haas.png","./imagenes/escuderias/mclaren.png", "./imagenes/escuderias/alpine.png","./imagenes/escuderias/redbull.png", "./imagenes/escuderias/alfaromeo.jpg","./imagenes/escuderias/mclaren.png", "./imagenes/escuderias/williams.png","./imagenes/escuderias/ferrari.png", "./imagenes/escuderias/haas.png","./imagenes/escuderias/aston.png", "./imagenes/escuderias/alphatauri.png","./imagenes/escuderias/redbull.png", "./imagenes/escuderias/aston.png")
+
+pilotos_2021 <- pilotos_2021 %>%
+  add_column(fotos_pil_2021, fotos_pais_2021, fotos_esc_2021) %>% select(nombres_normales, fotos_pil_2021, fotos_pais_2021, fotos_esc_2021)
+
+
+mundial_2021 <- pilotos_2021 %>% gt() %>% text_transform( locations = cells_body(columns = c(fotos_pil_2021)), fn = function(x) {gt::local_image(x, height = 100)}) %>% text_transform( locations = cells_body(columns = c(fotos_pais_2021)), fn = function(x) {gt::local_image(x, height = 50)}) %>% text_transform( locations = cells_body(columns = c(fotos_esc_2021)), fn = function(x) {gt::local_image(x, height = 70)}) %>% tab_header(title = md("**Pilotos 2021**"), subtitle = md("Parrilla")) %>%   cols_label(
+    nombres_normales = html(""),
+    fotos_pil_2021 = html(""),
+    fotos_pais_2021 = html(""),
+    fotos_esc_2021 = html("")) %>%  
+  tab_options(table.background.color = "gray13",   table.font.color.light = "cyan") %>% 
+  cols_align(align = "center",
+  columns = everything())
+
+
+mundial_2021
+```
+
+</center>
+
+## Templos 2021
+
+<center>
+
+Ubicación, número, nombre y país de cada circuito
+
+```{r, eval = TRUE, echo = FALSE, message=FALSE, warning=FALSE}
+
+globo_circ <-create_globe() %>% globe_pov(45.61560, 9.281110) %>% globe_bars(coords(lat, lng, label  = variables, color = round2), data = carreras_21_v2)  %>% scale_bars_color()
+globo_circ
+```
+
+</center>
+
+## 3.4 El nano
+
+### Alonso vs compañeros de equipo
+
+<center>
+
+```{r, eval = TRUE, echo = FALSE, message=FALSE, warning=FALSE}
+
+ggalo_vs_all <- ggplot(data = ALO_VS_ALL, aes(round, puntos_acumulados, color = driverRef)) +
+  geom_line() +
+  geom_point() + 
+  labs(title = "Alonso contra el mundo",
+       subtitle = "Alonso VS cada compañero de equipo",
+       y = "Puntos", x = "") + theme(axis.line = element_line(colour = "gray30",
+    linetype = "solid"), axis.ticks = element_line(colour = "gray30"),
+    panel.grid.major = element_line(colour = "gray20"),
+    panel.grid.minor = element_line(linetype = "blank"),
+    axis.title = element_text(size = 15,
+        colour = "white"), axis.text = element_text(colour = "white"),
+    plot.title = element_text(size = 20,
+        colour = "white", hjust = 0.5), legend.text = element_text(colour = "white"),
+    legend.title = element_text(colour = "white"),
+    panel.background = element_rect(fill = "gray13",
+        colour = "gray13", linetype = "solid"),
+    plot.background = element_rect(fill = "gray13",
+        colour = "gray13", linetype = "solid"),
+    legend.key = element_rect(fill = "gray13",
+        colour = "gray13"), legend.background = element_rect(fill = "gray13",
+        colour = "gray13")) +labs(x = "Nº carrera", colour = "Piloto") + theme(plot.subtitle = element_text(size = 10,
+    hjust = 0.5)) + facet_wrap( ~ year)  + transition_reveal(round)
+
+ggalo_vs_all
+
+```
+
+</center>
+
